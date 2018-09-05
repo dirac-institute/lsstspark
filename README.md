@@ -6,12 +6,24 @@ This repository is part of a project researching the benefits and issues related
 
 ### Prerequisites
 
-* An Amazon Machine Image with the LSST Stack and Spark pre-installed. An Ubuntu based AMI with LSST Stack, Spark, AWS CLI, S3FS, Tmux and Emacs is availble under AMI-ID: `ami-b0def9c8`
-* An EC2 cluster with an keyless ssh-access set up between them
+* An Amazon Machine Image with the LSST Stack and Spark pre-installed.
+* An EC2 cluster with an keyless ssh-access set up between them and
+* A Spark standalone cluster configuration on one of the EC2 instances ("master"")
 * An S3 Bucket containing the data to be processed
 * Jupyter with a kernel configured to `source` and `setup` the LSST Stack
 
+
 ### Running the code
+
+An Ubuntu 16.04 based AMI with LSST Stack, Spark, AWS CLI, S3FS, Jupyter and a registerd 'lsst' kernel, Tmux and Emacs is availble under AMI-ID: `ami-08fc15cde26798f1b`. This AMI should front-load most of the setup required to run this code. Once an instance is created using this AMI additional steps would include:
+
+* registering internal IP addresses in `/etc/hosts` under aliases
+* configuring the Spark cluster (see Spark's 'conf' folder)
+    * register all slaves in `~/spark...folder/conf/slaves` directly or via aliases used in `/etc/hosts`
+    * configure the default cluster worker-memory, driver-memory, allowed CPU usage etc.
+* Run the cluster by starting `~/spark...folder/sbin/start-all.sh` 
+* Use `~/spark...folder/sbin/start-all.sh` to submit script-like jobs to the cluster or 
+* run Jupyter Notebook and navigate to its hosted location
 
 In this repository in the `notebooks` folder there are several example notebooks describing how to run the provided code as well as providing in depth explanations what happens in the background. To run the Jupyter notebooks on the cluster execute the first cell that registers the application with the cluster, otherwise most of the code should execute on the EC2 instance from which the Notebooks are hosted from. The Notebooks were tested and run against a Spark Standalone cluster with 1 Master and 1 Slave node on EC2 instaces.       
 If the notebooks don't display on github automatically try the [Jupyter NBViewer](nbviewer.jupyter.org).
