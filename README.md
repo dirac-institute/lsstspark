@@ -1,6 +1,6 @@
-# [Project Title Placeholder]
+# Project Placeholder
 
-This repository is part of a project researching the benefits and issues related to running astronomical image analysis pipelines using cloud services. This particular repository contains code showcasing the required modifications to the Large Synoptic Sky Survey Telescope image analysis software required for it to be runnable on Amazon Web Services (AWS) using Spark. 
+This repository is part of a project researching the benefits and issues related to running astronomical image analysis pipelines using cloud services. This particular repository contains a pipeline showcasing the required modifications to the Large Synoptic Sky Survey Telescope image analysis software required for it to be run on Amazon Web Services (AWS) using Spark. 
 
 ## Getting started
 
