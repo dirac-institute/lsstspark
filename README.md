@@ -6,14 +6,15 @@ This repository is part of a project researching the benefits and issues related
 
 ### Prerequisites
 
-* An Amazon Machine Image with the LSST Stack and Spark pre-installed
+* An Amazon Machine Image with the LSST Stack and Spark pre-installed. An Ubuntu based AMI with LSST Stack, Spark, AWS CLI, S3FS, Tmux and Emacs is availble under AMI-ID: `ami-b0def9c8`
 * An EC2 cluster with an keyless ssh-access set up between them
 * An S3 Bucket containing the data to be processed
 * Jupyter with a kernel configured to `source` and `setup` the LSST Stack
 
 ### Running the code
 
-In this repository in the `notebooks` folder there are several example notebooks describing how to run the provided code as well as providing in depth explanations what happens in the background. To run the Jupyter notebooks on the cluster execute the first cell that registers the application with the cluster, otherwise most of the code should execute on the EC2 instance from which the Notebooks are hosted from. The Notebooks were tested and run against a Spark Standalone cluster with 1 Master and 1 Slave node on EC2 instaces.
+In this repository in the `notebooks` folder there are several example notebooks describing how to run the provided code as well as providing in depth explanations what happens in the background. To run the Jupyter notebooks on the cluster execute the first cell that registers the application with the cluster, otherwise most of the code should execute on the EC2 instance from which the Notebooks are hosted from. The Notebooks were tested and run against a Spark Standalone cluster with 1 Master and 1 Slave node on EC2 instaces.       
+If the notebooks don't display on github automatically try the [Jupyter NBViewer](nbviewer.jupyter.org).
 
 
 ## Deployement
