@@ -22,10 +22,11 @@ An Ubuntu 16.04 based AMI with LSST Stack, Spark, AWS CLI, S3FS, Jupyter and a r
     * register all slaves in `~/spark...folder/conf/slaves` directly or via aliases used in `/etc/hosts`
     * configure the default cluster worker-memory, driver-memory, allowed CPU usage etc.
 * Run the cluster by starting `~/spark...folder/sbin/start-all.sh` 
-* Use `~/spark...folder/sbin/start-all.sh` to submit script-like jobs to the cluster or 
+* Use `~/spark...folder/bin/spark-submit` to submit script-like jobs to the cluster or 
 * run Jupyter Notebook and navigate to its hosted location
 
 In this repository in the `notebooks` folder there are several example notebooks describing how to run the provided code as well as providing in depth explanations what happens in the background. To run the Jupyter notebooks on the cluster execute the first cell that registers the application with the cluster, otherwise most of the code should execute on the EC2 instance from which the Notebooks are hosted from. The Notebooks were tested and run against a Spark Standalone cluster with 1 Master and 1 Slave node on EC2 instaces.       
+
 If the notebooks don't display on github automatically try the [Jupyter NBViewer](nbviewer.jupyter.org).
 
 
