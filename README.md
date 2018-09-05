@@ -13,7 +13,8 @@ This repository is part of a project researching the benefits and issues related
 
 ### Running the code
 
-In this repository in the `notebooks` folder there are several example notebooks describing how to run the provided code as well as providing in depth explanations what happens in the background. To run the Jupyter notebooks on the cluster execute the first cell that registers the application with the cluster, otherwise most of the code should execute on the EC2 instance from which the Notebooks are hosted from. The Notebooks were tested and run against a Spark Standalone cluster with 1 Master and 1 Slave node on EC2 instaces.       
+In this repository in the `notebooks` folder there are several example notebooks describing how to run the provided code as well as providing in depth explanations what happens in the background. To run the Jupyter notebooks on the cluster execute the first cell that registers the application with the cluster, otherwise most of the code should execute on the EC2 instance from which the Notebooks are hosted from. The Notebooks were tested and run against a Spark Standalone cluster with 1 Master and 1 Slave node on EC2 instaces.     
+
 If the notebooks don't display on github automatically try the [Jupyter NBViewer](nbviewer.jupyter.org).
 
 
