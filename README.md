@@ -30,7 +30,7 @@ In this repository in the `notebooks` folder there are several example notebooks
 If the notebooks don't display on github automatically try the [Jupyter NBViewer](nbviewer.jupyter.org).
 
 
-## Deployement
+## Deployment
 
 * All ports used to access the Notebooks or the Spark UI need to be opened. This usually defaults to TCP protocols on 4040, 8888, 8080, 7077 (reconfigurable through spark_config)
 * Establish open communication for TCP, UDP and ICMP protocols between all nodes in the cluster
