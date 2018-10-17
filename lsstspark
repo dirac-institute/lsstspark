@@ -1,0 +1,105 @@
+#!/usr/bin/env python
+import os
+import shutil
+import argparse
+
+################################################################################
+#                                        Paths to folders
+################################################################################
+repopath = "https://github.com/dirac-institute/lsstspark.git"
+homepath = os.path.expanduser("~")
+
+lsstsparkpath = os.path.join(homepath, "lsstspark")
+cachepath = os.path.join(lsstsparkpath, "__pycache__")
+notebookpath = os.path.join(homepath, "notebooks")
+
+ziploc = os.path.join(homepath, "lsstspark.zip")
+
+
+################################################################################
+#                                        Functionality
+################################################################################
+
+def zip_lsstspark():
+    os.system("zip {0} {1}".format(ziploc, lsstsparkpath))
+
+
+def clean(rmpycache, rmzip, rmnotebooks, rmlsstspark):
+    if rmpycache:
+        try: shutil.rmtree(cachepath)
+        except FileNotFoundError: pass
+    if rmzip:
+        try: os.remove(ziploc)
+        except FileNotFoundError: pass
+    if rmnotebooks:
+        try: shutil.rmtree(notebookpath)
+        except FileNotFoundError: pass
+    if rmlsstspark:
+        try: shutil.rmtree(lsstsparkpath)
+        except FileNotFoundError: pass
+
+
+def install_lsstspark(branch, forced):
+    if forced and os.path.exists(lsstsparkpath):
+        # substantial danger
+        shutil.rmtree(lsstsparkpath)
+    
+    os.system("git clone {0} {1}".format(repopath, lsstsparkpath))
+    os.system("git -C {0} checkout {1}".format(lsstsparkpath, branch))
+
+    clean(False, False, True, False)
+    # can't shutil.move because git goes wild
+    shutil.move(os.path.join(lsstsparkpath, "notebooks"), notebookpath)
+    zip_lsstspark()
+
+
+
+################################################################################
+#                                        Parse args
+################################################################################
+parser = argparse.ArgumentParser(description=("Install and manage lsstspark"
+                                              "package on the cluster"))
+
+parser.add_argument("action", nargs="+", default=False,
+                    help="Action to perform: install, zip, clean...")
+
+parser.add_argument("-b", "--branch", nargs="?", dest="branch", type=str, 
+                    default="master",
+                    help="Pick a particular branch from which lsstspark will be installed.")
+parser.add_argument("-f", "--force", nargs="?", dest="forced", type=bool, 
+                    default=False, const=True,
+                    help="If a previous version of lsstspark exists, overwrite it.")
+
+parser.add_argument("--pycache", nargs="?", dest="rmpycache", type=bool, 
+                    default=True, const=False,
+                    help="Only remove python cache")
+parser.add_argument("--zip", nargs="?", dest="rmzip", type=bool, 
+                    default=True, const=False,
+                    help="Only remove the zipped module.")
+parser.add_argument("--notebooks", nargs="?", dest="rmnotebooks", type=bool, 
+                    default=True, const=False,
+                    help="Only remove the default example notebooks.")
+parser.add_argument("--lsstspark", nargs="?", dest="rmlsstspark", type=bool, 
+                    default=False, const=True,
+                    help="Remove the lsstspark package.")
+
+#args = parser.parse_args()
+#print()
+#print(args)
+#print()
+
+
+################################################################################
+#                                        Exec logic
+################################################################################
+
+if "clean" in args.action:
+    clean(args.rmpycache, args.rmzip, args.rmnotebooks, args.rmlsstspark)
+
+if "zip" in args.action:
+    zip_lsstspark()
+
+if "install" in args.action:
+    install_lsstspark(args.branch, args.forced)
+
+
