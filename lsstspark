@@ -24,7 +24,7 @@ def zip_lsstspark():
     os.system("zip {0} {1}".format(ziploc, lsstsparkpath))
 
 
-def clean(rmpycache, rmzip, rmnotebooks, rmlsstspark):
+def clean(rmpycache, rmzip, rmnotebooks, rmall):
     if rmpycache:
         try: shutil.rmtree(cachepath)
         except FileNotFoundError: pass
@@ -34,7 +34,7 @@ def clean(rmpycache, rmzip, rmnotebooks, rmlsstspark):
     if rmnotebooks:
         try: shutil.rmtree(notebookpath)
         except FileNotFoundError: pass
-    if rmlsstspark:
+    if rmall:
         try: shutil.rmtree(lsstsparkpath)
         except FileNotFoundError: pass
 
@@ -44,15 +44,22 @@ def install_lsstspark(branch, forced):
         # substantial danger
         shutil.rmtree(lsstsparkpath)
     
+    if os.path.exists(lsstsparkpath):
+        raise OSError(("git can not clone - folder exists! To force"
+                       "the installation try: lsstspark install -f'"))
     os.system("git clone {0} {1}".format(repopath, lsstsparkpath))
     os.system("git -C {0} checkout {1}".format(lsstsparkpath, branch))
 
     clean(False, False, True, False)
     # can't shutil.move because git goes wild
     shutil.move(os.path.join(lsstsparkpath, "notebooks"), notebookpath)
+    linkpath = "/home/ec2-user/anaconda3/envs/lsststack/lib/python3.6/site-packages/"
+    os.system("ln -f -s {0} {1}".format(lsstsparkpath, linkpath))
     zip_lsstspark()
 
 
+def mount_bucket(bucket):
+    os.system("sudo s3fs dinolsstspark -o use_cache=/tmp -o allow_other -o uid=1001 -o mp_umask=002 -o multireq_max=5 s3-drive/")
 
 ################################################################################
 #                                        Parse args
@@ -79,11 +86,14 @@ parser.add_argument("--zip", nargs="?", dest="rmzip", type=bool,
 parser.add_argument("--notebooks", nargs="?", dest="rmnotebooks", type=bool, 
                     default=True, const=False,
                     help="Only remove the default example notebooks.")
-parser.add_argument("--lsstspark", nargs="?", dest="rmlsstspark", type=bool, 
+parser.add_argument("--all", nargs="?", dest="rmall", type=bool, 
                     default=False, const=True,
-                    help="Remove the lsstspark package.")
+                    help="Remove the everything including the lsstspark package.")
+parser.add_argument("--bucket", nargs="?", dest="bucket", type=str, 
+                    default="dinolsstspark",
+                    help="Name of the bucket to mount.")
 
-#args = parser.parse_args()
+args = parser.parse_args()
 #print()
 #print(args)
 #print()
@@ -102,4 +112,5 @@ if "zip" in args.action:
 if "install" in args.action:
     install_lsstspark(args.branch, args.forced)
 
-
+if "mount" in args.action:
+    mount_bucket(args.bucket)
