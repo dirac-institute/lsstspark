@@ -1,10 +1,10 @@
 import lsst.pipe.base as pipeBase
 from lsst.meas.algorithms import IndexerRegistry, sourceSelectorRegistry
-from lsst.meas.astrom import MatchPessimisticBTask
+from lsst.meas.astrom import MatchPessimisticBTask, MatchOptimisticBTask
 import lsst.afw.table as afwTable
 import lsst.afw.geom as afwGeom
 
-import utils
+from . import utils
 
 __all__ = ["create_reference_catalogs", "match_sources_with_metadata",
            "match_sources", "resolve_shard_ids"]
@@ -129,7 +129,7 @@ def resolve_shard_ids(refCatConf, exposure, **kwargs):
 
 def trim2circle(catalogShard, ctrCoord, radius):
     """Trim a catalog to a circular aperture.
-    
+
     Parameters
     ----------
     catalog_shard : SourceCatalog to be trimmed
@@ -146,7 +146,7 @@ def trim2circle(catalogShard, ctrCoord, radius):
 def trim2bbox(refCat, bbox, wcs):
     """Remove objects outside a given pixel-based bbox and set centroid and
     hasCentroid fields.
-    
+
     Parameters
     ----------
     refCat : a catalog of objects (an lsst.afw.table.SimpleCatalog, or other
@@ -167,16 +167,17 @@ def trim2bbox(refCat, bbox, wcs):
 def merge_and_mask2circle(circle, shards, boundaryMask, refCatConf,
                           refCatLoc, refObjConf):
     """ Reads the master schema of the reference catalog and fills it with
-    sources that intersect the desired sky-circle for each shard in shards list. 
+    sources that intersect the desired sky-circle for each shard in shards list.
+
     Returned catalog is not neccessarily contiguous.
 
     Parameters
     ----------
     circle       : an lsst.pipe.base.Struct object containing ICRS center of
                    search region (an lsst.geom.SpherePoint) and radius
-                   of the search region (an lsst.geom.Angle) 
+                   of the search region (an lsst.geom.Angle)
     shards       : a list of shards (SourceCataog objects)
-    boundaryMask : a boolean array indicating whether the shard touches the 
+    boundaryMask : a boolean array indicating whether the shard touches the
                     boundary (True) or is fully contained (False)
     refCatConf   : reference catalog configuration
     location     : top level location of the reference catalog
@@ -186,9 +187,9 @@ def merge_and_mask2circle(circle, shards, boundaryMask, refCatConf,
     utils.add_flux_aliases(refCat.schema, refObjConf)
 
     # flux field identifies the filter of the exposure on which the trims were
-    # made because matcher needs to know which columns to compare. Removing it 
+    # made because matcher needs to know which columns to compare. Removing it
     # means it needs to be specified manually during the matching.
-    # The "problem" being that exposures come with the information in which filter 
+    # The "problem" being that exposures come with the information in which filter
     # they were made and remove any ambiguity when matching and therefore should
     # not be the users responsibility.
     #flux_field = get_ref_flux_field(refCat.schema, filterName=meta.filterName)
@@ -200,9 +201,9 @@ def merge_and_mask2circle(circle, shards, boundaryMask, refCatConf,
             refCat.extend(trim2circle(shard, circle.coord, circle.radius))
         else:
             refCat.extend(shard)
-    
+
     # trim2bbox will not work without contiguous catalog, however deep copy
-    # at this location does not seem to work for some reason 
+    # at this location does not seem to work for some reason
     #if not refCat.isContiguous():
     #    refCat = refCat.copy(deep=True)
 
@@ -212,7 +213,7 @@ def merge_and_mask2circle(circle, shards, boundaryMask, refCatConf,
 
     # retun Structs or break the continuity with LSST Stack?
     #pipeBase.Struct(refCat=expandedCat, fluxField=flux_field)
-    return expandedCat 
+    return expandedCat
 
 
 def create_reference_catalogs(refCatConf, refCatLoc, refObjConf, sorted_ = True):
@@ -245,8 +246,8 @@ def create_reference_catalogs(refCatConf, refCatLoc, refObjConf, sorted_ = True)
         circle, shard_ids, boundary_mask = resolve_shard_ids(refCatConf, exposure)
         shard_locs = utils.generate_shard_paths(shard_ids, refCatConf, refCatLoc)
         shards     = utils.get_shards(shard_locs)
-        
-        mergeRes = merge_and_mask2circle(circle, shards, boundary_mask, 
+
+        mergeRes = merge_and_mask2circle(circle, shards, boundary_mask,
                                          refCatConf, refCatLoc, refObjConf)
 
         # trim to bbox seems to break contiguity again
@@ -276,30 +277,30 @@ def match_sources(wcs, onFilter):
     """
     Wrapper function that is sets-up and returns a function that matches
     sources between a catalog pair.
-    
+
     Parameters
     ----------
     wcs      : WCS for the catalog pair in question
     onFilter : on which filter should the matching be performed
-    """ 
+    """
     def src_mtch(catalogPair):
         """
         Match objects in a catalog pair.
-        
+
         Parameters
         ----------
         catalogPair : a list or a tuple of (scienceCat, referenceCat).
-        """ 
+        """
         scienceCat, referenceCat = catalogPair
-        
+
         sciSrcSelTask = sourceSelectorRegistry["science"]()
         sciSelSrcs    = sciSrcSelTask.run(scienceCat)
-        
+
         refSrcSelTask = sourceSelectorRegistry["references"]()
         refSelSrcs    = refSrcSelTask.run(referenceCat)
-        
-        matchTask = MatchPessimisticBTask()
-        refFluxField = utils.get_ref_flux_field(referenceCat.getSchema(), 
+
+        matchTask = MatchOptimisticBTask()
+        refFluxField = utils.get_ref_flux_field(referenceCat.getSchema(),
                                                 filterName=onFilter)
         matches = matchTask.matchObjectsToSources(refCat = refSelSrcs.sourceCat,
                                                   sourceCat = sciSelSrcs.sourceCat,
@@ -307,7 +308,7 @@ def match_sources(wcs, onFilter):
                                                   refFluxField = refFluxField,
                                                   match_tolerance = None)
 
-        packed_matches = afwTable.packMatches(matches.matches)            
+        packed_matches = afwTable.packMatches(matches.matches)
         return packed_matches
     return src_mtch
 
@@ -315,19 +316,19 @@ def match_sources(wcs, onFilter):
 def match_sources_with_metadata(catalogPairWithMetadata):
     """
     Match sources in a catalog pair given exposure (from which the catalogs were produced) metadata.
-    
+
     """
     (scienceCat, referenceCat), meta = catalogPairWithMetadata
-    fluxField = utils.get_ref_flux_field(referenceCat.schema, 
+    fluxField = utils.get_ref_flux_field(referenceCat.schema,
                                          filterName=meta.filterName)
 
     sciSrcSelTask = sourceSelectorRegistry["science"]()
     sciSelSrcs    = sciSrcSelTask.run(scienceCat)
-    
+
     refSrcSelTask = sourceSelectorRegistry["references"]()
     refSelSrcs    = refSrcSelTask.run(referenceCat)
-    
-    matchTask = MatchPessimisticBTask()
+
+    matchTask = MatchOptimisticBTask()
     matches = matchTask.matchObjectsToSources(
         refCat          = refSelSrcs.sourceCat,
         sourceCat       = sciSelSrcs.sourceCat,
@@ -338,4 +339,4 @@ def match_sources_with_metadata(catalogPairWithMetadata):
 
     packed_matches = afwTable.packMatches(matches.matches)
     return packed_matches
-        
+

@@ -7,7 +7,7 @@ import lsst.meas.astrom as measAstrom
 import lsst.meas.algorithms as measAlgo
 import lsst.daf.persistence as dafPersist
 
-import utils
+from . import utils
 
 __all__ = ["match_and_fit_wcs", "wcs_solver"]
 
