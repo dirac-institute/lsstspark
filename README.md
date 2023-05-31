@@ -1,3 +1,7 @@
+# Archived 
+As of May 31 2023 this repository has been archived and is considered obsolete. The underlying Vera C. Rubin Science Pipelines, Data Butler and other Middleware components evolved past compatibility with this repository. For better solutions to the problem of scaling the Rubin Science Pipelines in the cloud see [DMTN-137](https://dmtn-137.lsst.io/) and [RubinAWS](https://github.com/astronomy-commons/RubinAWS).
+
+
 # Project Placeholder
 
 This repository is part of a project researching the benefits and issues related to running astronomical image analysis pipelines using cloud services. This particular repository contains a pipeline showcasing the required modifications to the Large Synoptic Sky Survey Telescope image analysis software required for it to be run on Amazon Web Services (AWS) using Spark. 
